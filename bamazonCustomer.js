@@ -18,7 +18,7 @@ var selectedProduct = "";
 
 function startUp () {
     // show all products for sale: display their ids, names, and prices
-    var query = "SELECT item_id, product_name, price FROM products";
+    var query = "SELECT item_id, product_name, price, stock_quantity FROM products";
     connection.query(query, function (err, res) {
         // display results
         for (var i = 0; i < res.length; i++) {
@@ -37,11 +37,16 @@ function startUp () {
             products.push(newProduct);
 
         }
-        console.log(product_ids);
+        // console.log(product_ids);
+        whatToBuy();
     });
 
+};
 
 
+
+function whatToBuy() {
+    // ask user what they want to buy
     inquirer.prompt([
         // The first should ask them the ID of the product they would like to buy.
         {
@@ -54,7 +59,11 @@ function startUp () {
         {
             message: "How many?",
             validate: function (value) {
-
+                if (Number(value) === NaN) {
+                    return "Please enter a number.";
+                } else {
+                    return true;
+                }
             },
             name: "howMany"
         }
@@ -67,57 +76,33 @@ function startUp () {
             }
         }
 
+        console.log("Stock: " + selectedProduct.stock_quantity);
+        console.log("I want: " + response.howMany);
+
         // if there is enough stock
         if (selectedProduct.stock_quantity > response.howMany) {
             // function here
-            console.log("We have enough for that order!");
+            makeOrder(selectedProduct.stock_quantity, response.howMany, selectedProduct.item_id);
         } else {
             // if not enough stock
             // function here
             console.log("Insufficient quantity.");
         }
     });
-
-
-    
-
-    // ask user what they want to buy
-    // inquirer.prompt([
-    //     // The first should ask them the ID of the product they would like to buy.
-    //     {
-    //         message: "Which product would you like to buy? (Choose its ID below)",
-    //         type: "list",
-    //         choices: product_ids,
-    //         name: "productToBuy"
-    //     },
-    //     // The second message should ask how many units of the product they would like to buy.
-    //     {
-    //         message: "How many?",
-    //         validate: function(value) {
-
-    //         },
-    //         name: "howMany"
-    //     }
-    // ]).then(function(response) {
-    //     // do we have enough stock for user's purchase?
-    //     // find product info
-    //     for (var i = 0; i < products.length; i++) {
-    //         if (products[i].item_id === Number(response.productToBuy)) {
-    //             selectedProduct = products[i];
-    //         }
-    //     }
-
-    //     // if there is enough stock
-    //     if (selectedProduct.stock_quantity > response.howMany) {
-    //         // function here
-    //         console.log("We have enough for that order!");
-    //     } else {
-    //         // if not enough stock
-    //         // function here
-    //         console.log("Insufficient quantity.");
-    //     }
-    // });
 };
+
+
+function makeOrder (currentStock, orderAmount, itemID) {
+    console.log("We have enough for that order!");
+    // update db quantity
+    var newStock = currentStock - orderAmount;
+    var query = "UPDATE products SET stock_quantity = " + newStock + " WHERE item_id = " + itemID;
+    connection.query(query, function (err, res) {
+        if (err) throw err;
+        console.log("stock updated");
+        console.log(res);
+    })
+}
 
 
 
