@@ -18,6 +18,8 @@ var selectedProduct = "";
 
 function startUp () {
     // show all products for sale: display their ids, names, and prices
+    console.log("\nCURRENT PRODUCTS FOR SALE");
+    console.log("--------------------------------------------");
     var query = "SELECT item_id, product_name, price, stock_quantity FROM products";
     connection.query(query, function (err, res) {
         // display results
@@ -46,6 +48,7 @@ function startUp () {
 
 
 function whatToBuy() {
+    console.log("");
     // ask user what they want to buy
     inquirer.prompt([
         // The first should ask them the ID of the product they would like to buy.
@@ -76,31 +79,36 @@ function whatToBuy() {
             }
         }
 
-        console.log("Stock: " + selectedProduct.stock_quantity);
-        console.log("I want: " + response.howMany);
+        console.log("You requested: " + response.howMany + " | " + "Current Stock: " + selectedProduct.stock_quantity);
 
         // if there is enough stock
         if (selectedProduct.stock_quantity > response.howMany) {
             // function here
             makeOrder(selectedProduct.stock_quantity, response.howMany, selectedProduct.item_id);
+
         } else {
             // if not enough stock
             // function here
             console.log("Insufficient quantity.");
+
+            // show menu again
+            whatToBuy();
         }
     });
 };
 
 
 function makeOrder (currentStock, orderAmount, itemID) {
-    console.log("We have enough for that order!");
     // update db quantity
     var newStock = currentStock - orderAmount;
     var query = "UPDATE products SET stock_quantity = " + newStock + " WHERE item_id = " + itemID;
     connection.query(query, function (err, res) {
         if (err) throw err;
-        console.log("stock updated");
-        console.log(res);
+        console.log("Order successful!");
+        console.log(res.changedRows + " changed stock.");
+
+        // show menu again
+        whatToBuy();
     })
 }
 
