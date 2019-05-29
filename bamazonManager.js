@@ -35,8 +35,9 @@ var connection = mysql.createConnection({
 });
 
 
-// var product_ids = [];
+var product_ids = [];
 var products = [];
+var toDisplay = [];
 
 // var selectedProduct = "";
 
@@ -63,12 +64,10 @@ function menuOptions() {
                 break;
 
             case "View Low Inventory":
-                console.log("low inv");
                 viewLowInventory();
                 break;
 
             case "Add to Inventory":
-                console.log("add to inv");
                 addToInventory();
                 break;
 
@@ -117,10 +116,7 @@ function viewProducts() {
     connection.query(query, function (err, res) {
         // display results
         for (var i = 0; i < res.length; i++) {
-            console.log(res[i].item_id + " | " + res[i].product_name + " | " + res[i].price + " | " + res[i].stock_quantity);
-
-            // add ids to an array
-            // product_ids.push(res[i].item_id);
+            console.log(res[i].item_id + " | " + res[i].product_name + " | $" + res[i].price + " | Inventory:" + res[i].stock_quantity);
 
             var newProduct = {
                 item_id: res[i].item_id,
@@ -144,29 +140,12 @@ function viewProducts() {
 function viewLowInventory() {
     console.log("\nPRODUCTS WITH INVENTORY LOWER THAN 5");
     console.log("--------------------------------------------");
-    var query = "SELECT item_id, product_name, price, stock_quantity FROM products";
+    var query = "SELECT item_id, product_name, price, stock_quantity FROM products WHERE stock_quantity < 5;";
     connection.query(query, function (err, res) {
         // display results
         for (var i = 0; i < res.length; i++) {
-            // console.log(res[i].item_id + " | " + res[i].product_name + " | " + res[i].price + " | " + res[i].stock_quantity);
 
-            // add ids to an array
-            // product_ids.push(res[i].item_id);
-
-            var newProduct = {
-                item_id: res[i].item_id,
-                product_name: res[i].product_name,
-                price: res[i].price,
-                stock_quantity: res[i].stock_quantity
-            }
-            // add product info to array as well
-            products.push(newProduct);
-
-
-            if (res[i].stock_quantity < 5) {
-                console.log(res[i].item_id + " | " + res[i].product_name + " | Inventory: " + res[i].stock_quantity);
-            }
-
+            console.log(res[i].item_id + " | " + res[i].product_name + " | Inventory: " + res[i].stock_quantity);
         }
 
         menuOptions();
@@ -185,23 +164,82 @@ function viewLowInventory() {
 
 
 
-function makeOrder(currentStock, orderAmount, itemID) {
-    // update db quantity
-    var newStock = currentStock - orderAmount;
-    var query = "UPDATE products SET stock_quantity = " + newStock + " WHERE item_id = " + itemID;
+// function makeOrder(currentStock, orderAmount, itemID) {
+//     // update db quantity
+//     var newStock = currentStock - orderAmount;
+//     var query = "UPDATE products SET stock_quantity = " + newStock + " WHERE item_id = " + itemID;
+//     connection.query(query, function (err, res) {
+//         if (err) throw err;
+//         console.log("Order successful!");
+
+//         // show total purchase cost
+//         console.log("Total Cost: $" + selectedProduct.price * orderAmount);
+
+//         console.log(res.changedRows + " changed stock.");
+
+//         // show menu again
+//         whatToBuy();
+//     })
+// }
+
+
+
+function addToInventory() {
+    // get list of products
+    var query = "SELECT item_id, product_name, price, stock_quantity FROM products";
     connection.query(query, function (err, res) {
-        if (err) throw err;
-        console.log("Order successful!");
+        // display results
+        for (var i = 0; i < res.length; i++) {
 
-        // show total purchase cost
-        console.log("Total Cost: $" + selectedProduct.price * orderAmount);
+            var newitem = res[i].item_id + " | " + res[i].product_name + " | $" + res[i].price + " | Inventory:" + res[i].stock_quantity;
 
-        console.log(res.changedRows + " changed stock.");
+            toDisplay.push(newitem);
+        }
 
-        // show menu again
-        whatToBuy();
-    })
+        console.log("");
+        inquirer.prompt([
+            {
+                message: "Which product would you like to update?",
+                type: "list",
+                choices: toDisplay,
+                name: "product"
+            },
+            {
+                message: "What would you like to change the stock quantity to?",
+                validate: function (value) {
+                    if (Number(value) === NaN) {
+                        return "Please enter a number.";
+                    } else {
+                        return true;
+                    }
+                },
+                name: "newStock"
+            }
+        ]).then(function (response) {
+            // grab item id
+            var itemID = response.product.charAt(0);
+
+            // update stock
+            var query = "UPDATE products SET stock_quantity = " + response.newStock + " WHERE item_id = " + itemID;
+            connection.query(query, function (err, res) {
+                if (err) throw err;
+                console.log("Stock Quantity Updated.");
+
+                console.log(res.changedRows + " rows updated.");
+
+                // show menu again
+                menuOptions();
+            })
+
+        });
+    });
+
 }
+
+
+
+
+
 
 
 
