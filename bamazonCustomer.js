@@ -24,7 +24,7 @@ function startUp () {
     connection.query(query, function (err, res) {
         // display results
         for (var i = 0; i < res.length; i++) {
-            console.log(res[i].item_id + " | " + res[i].product_name + " | " + res[i].price);
+            console.log(res[i].item_id + " | " + res[i].product_name + " | $" + res[i].price);
             
             // add ids to an array
             product_ids.push(res[i].item_id);
@@ -105,6 +105,10 @@ function makeOrder (currentStock, orderAmount, itemID) {
     connection.query(query, function (err, res) {
         if (err) throw err;
         console.log("Order successful!");
+
+        // show total purchase cost
+        console.log("Total Cost: $" + selectedProduct.price * orderAmount);
+
         console.log(res.changedRows + " changed stock.");
 
         // show menu again
@@ -119,15 +123,3 @@ connection.connect(function(error){
     startUp();
 });
 
-
-
-
-
-//Ask user 2 questions:
-    // The first should ask them the ID of the product they would like to buy.
-    // The second message should ask how many units of the product they would like to buy.
-        // check to see if you have enough
-            // if not - "insufficient quantity"
-            // if you do
-                // update sql db quantity
-                // show user total cost of their purchase
