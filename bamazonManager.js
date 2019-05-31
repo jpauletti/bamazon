@@ -239,6 +239,50 @@ function addToInventory() {
 
 
 
+function addNewProduct() {
+
+    inquirer.prompt([
+        {
+            message: "Enter Product Name:",
+            name: "name"
+        },
+        {
+            message: "What department is this product in?",
+            name: "department"
+        },
+        {
+            message: "What's the price?",
+            name: "price"
+        },
+        {
+            message: "What is this product's stock quantity?",
+            name: "stock"
+        }
+    ]).then(function (response) {
+        var product = response.name;
+        var department = response.department;
+        var numPrice = Number(response.price);
+        var stock = response.stock;
+        
+
+        // add to DB
+        var newItem = product + '", "' + department + '", "' + numPrice + '", "' + stock;
+        var query = 'INSERT INTO products (product_name, department_name, price, stock_quantity) VALUES ("' + newItem + '")';
+
+        connection.query(query, function (err, res) {
+            if (err) throw err;
+            console.log("New Product '" + product + "' added.");
+
+            // show menu again
+            menuOptions();
+        })
+    })
+
+}
+
+
+
+
 
 
 
