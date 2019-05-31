@@ -101,7 +101,8 @@ function whatToBuy() {
 function makeOrder (currentStock, orderAmount, itemID) {
     // update db quantity
     var newStock = currentStock - orderAmount;
-    var query = "UPDATE products SET stock_quantity = " + newStock + " WHERE item_id = " + itemID;
+    var newSales = selectedProduct.price * orderAmount;
+    var query = "UPDATE products SET stock_quantity = " + newStock + ", product_sales = " + newSales + " WHERE item_id = " + itemID;
     connection.query(query, function (err, res) {
         if (err) throw err;
         console.log("Order successful!");
