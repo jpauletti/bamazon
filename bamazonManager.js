@@ -62,7 +62,7 @@ function viewProducts() {
     connection.query(query, function (err, res) {
         // display results
         for (var i = 0; i < res.length; i++) {
-            console.log(res[i].item_id + " | " + res[i].product_name + " | $" + res[i].price + " | Inventory:" + res[i].stock_quantity);
+            console.log(res[i].item_id + " | " + res[i].product_name + " | $" + res[i].price + " | Inventory: " + res[i].stock_quantity);
 
         }
 
