@@ -49,8 +49,6 @@ function viewSales() {
 
 
     connection.query(query, function (err, res) {
-        console.log(res);
-        // var count = 0;
         for (var i = 0; i < res.length; i++) {
             var deptID = res[i].department_id;
             var deptName = res[i].department_name;
