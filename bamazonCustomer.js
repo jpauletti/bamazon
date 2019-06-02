@@ -1,7 +1,7 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 
-
+// mysql connection
 var connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
@@ -37,12 +37,9 @@ function startUp () {
             }
             // add product info to array as well
             products.push(newProduct);
-
         }
-        // console.log(product_ids);
         whatToBuy();
     });
-
 };
 
 
@@ -51,14 +48,13 @@ function whatToBuy() {
     console.log("");
     // ask user what they want to buy
     inquirer.prompt([
-        // The first should ask them the ID of the product they would like to buy.
+        // ask user which product they want, and how much of it
         {
             message: "Which product would you like to buy? (Choose its ID below)",
             type: "list",
             choices: product_ids,
             name: "productToBuy"
         },
-        // The second message should ask how many units of the product they would like to buy.
         {
             message: "How many?",
             validate: function (value) {
@@ -83,12 +79,9 @@ function whatToBuy() {
 
         // if there is enough stock
         if (selectedProduct.stock_quantity > response.howMany) {
-            // function here
             makeOrder(selectedProduct.stock_quantity, response.howMany, selectedProduct.item_id);
-
         } else {
             // if not enough stock
-            // function here
             console.log("Insufficient quantity.");
 
             // show menu again
@@ -99,18 +92,17 @@ function whatToBuy() {
 
 
 function makeOrder (currentStock, orderAmount, itemID) {
-    // update db quantity
+    // update db quantity and add to product_sales
     var newStock = currentStock - orderAmount;
     var newSales = selectedProduct.price * orderAmount;
     var query = "UPDATE products SET stock_quantity = " + newStock + ", product_sales = product_sales + " + newSales + " WHERE item_id = " + itemID;
+
     connection.query(query, function (err, res) {
         if (err) throw err;
         console.log("Order successful!");
 
         // show total purchase cost
         console.log("Total Cost: $" + selectedProduct.price * orderAmount);
-
-        console.log(res.changedRows + " changed stock.");
 
         // show menu again
         whatToBuy();
