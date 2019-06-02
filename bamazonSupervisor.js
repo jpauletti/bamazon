@@ -37,7 +37,7 @@ function menuOptions () {
 
 function viewSales() {
     var query = 'SELECT department_id, departments.department_name, over_head_costs, any_value(SUM(product_sales)) AS product_sales, any_value(over_head_costs - product_sales) AS "total profit" ';
-    query += "FROM departments INNER JOIN products ON(departments.department_name = products.department_name) ";
+    query += "FROM departments LEFT JOIN products ON(departments.department_name = products.department_name) ";
     query += "GROUP BY department_id, department_name, over_head_costs ";
     query += "ORDER BY department_id";
 
@@ -55,20 +55,25 @@ function viewSales() {
             var deptID = res[i].department_id;
             var deptName = res[i].department_name;
             var ohCosts = res[i].over_head_costs;
-            var productSales = res[i].product_sales;
-            var totalProfit = res[i]["total profit"];
+            // product sales could be null if the department was created, but no products in that dept are for sale
+            // if null, make the value an empty string (cli-table gives error when null values are present)
+            if (res[i].product_sales === null) {
+                var productSales = "";
+            } else {
+                var productSales = res[i].product_sales;
+            }
+
+            // total profit has same null possibility
+            if (res[i]["total profit"] === null) {
+                var totalProfit = "";
+            } else {
+                var totalProfit = res[i]["total profit"];
+            }
 
             // add results to table
             table.push(
                 [deptID, deptName, ohCosts, productSales, totalProfit]
             );
-            // console.log(count);
-
-            // if (count === (res.length - 1)) {
-            //     console.log(table.toString());
-            // }
-
-            // count++;
         }
         // console.log the full table
         console.log(table.toString());
