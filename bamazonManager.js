@@ -39,7 +39,6 @@ function menuOptions() {
                 break;
 
             case "Add New Product":
-                console.log("new product");
                 addNewProduct();
                 break;
 
