@@ -1,5 +1,7 @@
 # bamazon
 
+This is an Amazon-like CLI with a customer, manager, and supervisor view.  There are products available for the customer to buy, managers can add items and see & update stock, while supervisors can see how each department is doing sales-wise.
+
 ## Customer View
 As a customer, you can see the list of products for sale.  Then you can choose one to buy, and, if there is enough stock quantity, your order will be placed.
 
